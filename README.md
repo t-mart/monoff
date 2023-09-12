@@ -1,16 +1,18 @@
 # ![monoff](docs/monoff.png) monoff - Turn off your monitors on Windows
 
-monoff is a Windows program that turns off/sleeps your monitors -- that's it. When you
+monoff is a Windows program that turns off/sleeps your monitors – that's it. When you
 move your mouse or press a key on the keyboard, they'll turn back on again.
 
-There's no magic to it. It works the same way as if you'd left your computer
+- **Simple**: There's no magic to it. It works the same way as if you'd left your computer
 inactive for however many minutes.
+- **Portable**: Everything about it is self-contained in the .exe and does not
+require an installer. You can even run it from a USB stick.
+- **Convenient**: I wrote this program because I purchased some monitors whose
+power switches were hard to reach. Now, I can just click an icon in my taskbar.
+- **Safe**: This program is open-source, and you can inspect the code and build it yourself.
 
 You can also specify a delay before the monitors turn off, so that you can
-safely remove your hand from your mouse, for example.
-
-I wrote this program because I purchased some monitors whose power switches
-were hard to reach. Now, I can just click an icon in my taskbar.
+safely remove your hand from your mouse, for example. It defaults to 50 milliseconds.
 
 ## Installation
 
@@ -19,6 +21,8 @@ were hard to reach. Now, I can just click an icon in my taskbar.
 Download `monoff.exe` from the [latest
 release](https://github.com/t-mart/monoff/releases/latest) and put it somewhere,
 such as on your Desktop.
+
+Running it is then as simple as double-clicking it.
 
 ### Scoop
 
@@ -29,9 +33,11 @@ scoop bucket add t-mart https://github.com/t-mart/t-mart-scoop-bucket
 scoop install t-mart/monoff
 ```
 
-This will place the executable at
-`%UserProfile%\scoop\apps\monoff\current\monoff.exe`. It will also create a
-Start Menu item.
+This will:
+
+- put `monoff` in your `PATH` variable
+- place the executable at `%UserProfile%\scoop\apps\monoff\current\monoff.exe`
+- create a Start Menu item
 
 ### Cargo
 
@@ -41,7 +47,7 @@ Run:
 cargo install --git https://github.com/t-mart/monoff
 ```
 
-This will place the executable at `%UserProfile%\.cargo\bin\monoff.exe`.
+This will place the executable at `%UserProfile%\.cargo\bin\monoff.exe` (and, most likely, put it in your `PATH` variable).
 
 ## Making it a taskbar icon
 
