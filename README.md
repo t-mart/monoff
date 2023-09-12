@@ -20,6 +20,15 @@ Download `monoff.exe` from the [latest
 release](https://github.com/t-mart/monoff/releases/latest) and put it somewhere,
 such as on your Desktop.
 
+### Scoop
+
+Run:
+
+```shell
+scoop bucket add t-mart https://github.com/t-mart/t-mart-scoop-bucket
+scoop install t-mart/monoff
+```
+
 ### Cargo
 
 Run:
