@@ -14,6 +14,6 @@
 
 6. Create a new release with uploaded assets:
 
-  ```shell
-  gh release create --generate-notes <version> target/release/monoff.exe target/release/monoff.exe-checksum.sha256.txt
-  ```
+   ```shell
+   gh release create --generate-notes <version> target/release/monoff.exe target/release/monoff. exe-checksum.sha256.txt
+   ```
