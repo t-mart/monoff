@@ -12,13 +12,6 @@ safely remove your hand from your mouse, for example.
 I wrote this program because I purchased some monitors whose power switches
 were hard to reach. Now, I can just click an icon in my taskbar.
 
-This program is heavily inspired by [lcdoff-rs](https://github.com/Gekkio/lcdoff-rs) (and its partner [article](https://gekkio.fi/blog/2014/calling-win32-api-with-rust-ffi/)), but with a few differences:
-
-- uses the [`windows`](https://crates.io/crates/windows) crate, which is a
-  little easier/idiomatic to work with
-- accepts a delay parameter, the amount of time to wait before powering the monitors off
-- has a representative icon
-
 ## Installation
 
 ### From GitHub
@@ -41,9 +34,9 @@ As normal, just drag the application to your taskbar. This will make a shortcut:
 
 ![add to taskbar](/docs/add-to-taskbar.gif)
 
-From here, you can just click to icon to turn off your monitors.
+From here, you can just click to icon the turn off your monitors.
 
-If you want to add a delay to this shortcut, edit the `Target` value its properties:
+If you want to add a delay to this shortcut, edit the `Target` value in its properties:
 
 ![edit shortcut arguments](/docs/shortcut-arguments.gif)
 
@@ -66,3 +59,12 @@ If you want to add a delay to this shortcut, edit the `Target` value its propert
   ```shell
   monoff.exe --help
   ```
+
+## Thanks
+
+This program is heavily inspired by [lcdoff-rs](https://github.com/Gekkio/lcdoff-rs) (and its partner [article](https://gekkio.fi/blog/2014/calling-win32-api-with-rust-ffi/)), but with a few differences:
+
+- uses the [`windows`](https://crates.io/crates/windows) crate, which is a
+  little easier/idiomatic to work with
+- accepts a delay parameter, the amount of time to wait before powering the monitors off
+- has a representative icon
