@@ -10,6 +10,7 @@
    cargo build --release
    cd target/release
    sha256sum monoff.exe > monoff.exe-checksum.sha256.txt
+   cd ../..
    ```
 
 6. Create a version variable:
@@ -21,5 +22,5 @@
 7. Create a new release with uploaded assets:
 
    ```shell
-   gh release create --generate-notes $($monoff_version) target/release/monoff.exe target/release/monoff exe-checksum.sha256.txt
+   gh release create --generate-notes $($monoff_version) target/release/monoff.exe target/release/monoff.exe-checksum.sha256.txt
    ```
