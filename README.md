@@ -29,7 +29,9 @@ scoop bucket add t-mart https://github.com/t-mart/t-mart-scoop-bucket
 scoop install t-mart/monoff
 ```
 
-This will place the executable at `%UserProfile%\scoop\apps\monoff\current\monoff.exe`.
+This will place the executable at
+`%UserProfile%\scoop\apps\monoff\current\monoff.exe`. It will also create a
+Start Menu item.
 
 ### Cargo
 
