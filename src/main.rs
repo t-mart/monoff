@@ -1,3 +1,4 @@
+// prevent a console window from flashing
 #![windows_subsystem = "windows"]
 
 use std::thread::sleep;
@@ -26,15 +27,17 @@ struct Args {
 }
 
 fn main() -> Result<()> {
-    // so stdin/out/err work
+    // attach to parent console so that stdin/stdout/stderr work
     unsafe {
         AttachConsole(ATTACH_PARENT_PROCESS)?;
     }
 
+    // parse args and delay
     let args = Args::parse();
     let sleep_duration = Duration::from_millis(args.delay.into());
     sleep(sleep_duration);
 
+    // turn off monitors
     unsafe {
         let instance = GetModuleHandleW(None)?;
 
@@ -68,7 +71,7 @@ fn main() -> Result<()> {
             window,
             WM_SYSCOMMAND,
             WPARAM(SC_MONITORPOWER as usize),
-            LPARAM(2),
+            LPARAM(2), // 2 = off, -1 = on, 1 = low power
         )
     }
 }
