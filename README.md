@@ -1,5 +1,8 @@
 # ![monoff](docs/monoff.png) monoff - Turn off your monitors on Windows
 
+![GitHub all releases](https://img.shields.io/github/downloads/t-mart/monoff/total)
+![GitHub release (with filter)](https://img.shields.io/github/v/release/t-mart/monoff)
+
 monoff is a Windows program that turns off/sleeps your monitors – that's it. When you
 move your mouse or press a key on the keyboard, they'll turn back on again.
 
