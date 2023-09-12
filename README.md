@@ -4,7 +4,7 @@ monoff is a Windows program that turns off/sleeps your monitors – that's it. W
 move your mouse or press a key on the keyboard, they'll turn back on again.
 
 - **Simple**: There's no magic to it. It works the same way as if you'd left your computer
-inactive for however many minutes.
+inactive for however many minutes. Click it, and the monitors turn off.
 - **Portable**: Everything about it is self-contained in the .exe and does not
 require an installer. You can even run it from a USB stick.
 - **Convenient**: I wrote this program because I purchased some monitors whose
@@ -49,17 +49,22 @@ cargo install --git https://github.com/t-mart/monoff
 
 This will place the executable at `%UserProfile%\.cargo\bin\monoff.exe` (and, most likely, put it in your `PATH` variable).
 
-## Making it a taskbar icon
+## Making it a taskbar shortcut
 
-As normal, just drag the application to your taskbar. This will make a shortcut:
+As normal, just drag the application to your taskbar:
 
 ![add to taskbar](/docs/add-to-taskbar.gif)
 
-From here, you can just click to icon the turn off your monitors.
+From here, you can **just click to icon** the turn off your monitors.
 
-If you want to add a delay to this shortcut, edit the `Target` value in its properties:
+<details>
+  <summary>Adding a delay</summary>
 
-![edit shortcut arguments](/docs/shortcut-arguments.gif)
+  The default delay (50ms) is fine in most cases. But, if you want to add a
+  delay to this shortcut, edit the `Target` value in its properties:
+
+  ![edit shortcut arguments](/docs/shortcut-arguments.gif)
+</details>
 
 ## Usage examples
 
