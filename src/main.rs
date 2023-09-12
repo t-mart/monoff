@@ -29,6 +29,8 @@ struct Args {
 fn main() -> Result<()> {
     // attach to parent console so that stdin/stdout/stderr work
     unsafe {
+        // disregard result. if we can't attach to the parent console, we're
+        // probably being run without a console anyway
         let _ = AttachConsole(ATTACH_PARENT_PROCESS);
     }
 
