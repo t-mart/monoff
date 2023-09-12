@@ -29,6 +29,8 @@ scoop bucket add t-mart https://github.com/t-mart/t-mart-scoop-bucket
 scoop install t-mart/monoff
 ```
 
+This will place the executable at `%UserProfile%\scoop\apps\monoff\current\monoff.exe`.
+
 ### Cargo
 
 Run:
@@ -36,6 +38,8 @@ Run:
 ```shell
 cargo install --git https://github.com/t-mart/monoff
 ```
+
+This will place the executable at `%UserProfile%\.cargo\bin\monoff.exe`.
 
 ## Making it a taskbar icon
 
