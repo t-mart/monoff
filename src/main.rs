@@ -29,7 +29,7 @@ struct Args {
 fn main() -> Result<()> {
     // attach to parent console so that stdin/stdout/stderr work
     unsafe {
-        AttachConsole(ATTACH_PARENT_PROCESS)?;
+        let _ = AttachConsole(ATTACH_PARENT_PROCESS);
     }
 
     // parse args and delay
