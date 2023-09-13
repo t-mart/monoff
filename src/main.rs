@@ -6,9 +6,12 @@ use std::time::Duration;
 
 use clap::Parser;
 use windows::{
-    core::*, Win32::Foundation::*, Win32::System::Console::*,
-    Win32::System::LibraryLoader::GetModuleHandleW,
-    Win32::UI::WindowsAndMessaging::*,
+    core::*,
+    Win32::{
+        Foundation::*,
+        System::{Console::*, LibraryLoader::GetModuleHandleW},
+        UI::WindowsAndMessaging::*,
+    },
 };
 
 const DEFAULT_DELAY: u16 = 50;
@@ -21,8 +24,8 @@ struct Args {
         short,
         long,
         default_value_t = DEFAULT_DELAY,
-        value_parser = clap::value_parser!(u16).range(0..))
-    ]
+        value_parser = clap::value_parser!(u16).range(0..)
+    )]
     delay: u16,
 }
 
