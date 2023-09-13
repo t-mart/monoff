@@ -19,7 +19,7 @@ struct Args {
     /// Number of millseconds to delay before turning off the monitors
     #[arg(
         short,
-        long, 
+        long,
         default_value_t = DEFAULT_DELAY,
         value_parser = clap::value_parser!(u16).range(0..))
     ]
@@ -28,31 +28,30 @@ struct Args {
 
 /// Attach to the parent console so that stdin/stdout/stderr work.
 fn attach_console() -> Result<()> {
-    unsafe {
-        AttachConsole(ATTACH_PARENT_PROCESS)
-    }
+    unsafe { AttachConsole(ATTACH_PARENT_PROCESS) }
 }
 
 /// Turn off the monitors.
-/// 
+///
 /// This function creates a window and sends a message to it to turn off the
 /// monitors. The window is never shown, and is destroyed when the program
 /// exits.
 fn turn_off_monitors() -> Result<()> {
     let window_class_name = w!("monoff");
-    unsafe {
-        let instance = GetModuleHandleW(None)?;
 
-        let window_class = WNDCLASSW {
-            hInstance: instance.into(),
-            lpszClassName: window_class_name,
-            lpfnWndProc: Some(wndproc),
-            ..Default::default()
-        };
+    let instance = unsafe { GetModuleHandleW(None)? };
 
-        RegisterClassW(&window_class);
+    let window_class = WNDCLASSW {
+        hInstance: instance.into(),
+        lpszClassName: window_class_name,
+        lpfnWndProc: Some(wndproc),
+        ..Default::default()
+    };
 
-        let window = CreateWindowExW(
+    unsafe { RegisterClassW(&window_class) };
+
+    let window = unsafe {
+        CreateWindowExW(
             WINDOW_EX_STYLE::default(),
             window_class_name,
             PCWSTR::null(),
@@ -65,8 +64,10 @@ fn turn_off_monitors() -> Result<()> {
             None,
             instance,
             None,
-        );
+        )
+    };
 
+    unsafe {
         SendNotifyMessageW(
             window,
             WM_SYSCOMMAND,
@@ -78,7 +79,7 @@ fn turn_off_monitors() -> Result<()> {
 
 /// this function processes messages that our window receives. we just do the
 /// default and passthrough to DefWindowProcW.
-/// 
+///
 /// why don't we just use DefWindowProcW directly, you ask? because
 /// DefWindowProcW is unsafe, but the interface for the lpfnWndProc field of the
 /// WNDCLASSW wants a safe function. so we have to wrap it in a safe function.
@@ -89,7 +90,7 @@ extern "system" fn wndproc(
     window: HWND,
     message: u32,
     wparam: WPARAM,
-    lparam: LPARAM
+    lparam: LPARAM,
 ) -> LRESULT {
     unsafe { DefWindowProcW(window, message, wparam, lparam) }
 }
