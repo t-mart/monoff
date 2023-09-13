@@ -26,37 +26,35 @@ struct Args {
     delay: u16,
 }
 
-fn main() -> Result<()> {
-    // attach to parent console so that stdin/stdout/stderr work
+/// Attach to the parent console so that stdin/stdout/stderr work.
+fn attach_console() -> Result<()> {
     unsafe {
-        // disregard result. if we can't attach to the parent console, we're
-        // probably being run without a console anyway
-        let _ = AttachConsole(ATTACH_PARENT_PROCESS);
+        AttachConsole(ATTACH_PARENT_PROCESS)
     }
+}
 
-    // parse args and delay
-    let args = Args::parse();
-    let sleep_duration = Duration::from_millis(args.delay.into());
-    sleep(sleep_duration);
-
-    // turn off monitors
+/// Turn off the monitors.
+/// 
+/// This function creates a window and sends a message to it to turn off the
+/// monitors. The window is never shown, and is destroyed when the program
+/// exits.
+fn turn_off_monitors() -> Result<()> {
+    let window_class_name = w!("monoff");
     unsafe {
         let instance = GetModuleHandleW(None)?;
 
-        let window_class = w!("monoff");
-
-        let wc = WNDCLASSW {
+        let window_class = WNDCLASSW {
             hInstance: instance.into(),
-            lpszClassName: window_class,
+            lpszClassName: window_class_name,
             lpfnWndProc: Some(wndproc),
             ..Default::default()
         };
 
-        RegisterClassW(&wc);
+        RegisterClassW(&window_class);
 
         let window = CreateWindowExW(
             WINDOW_EX_STYLE::default(),
-            window_class,
+            window_class_name,
             PCWSTR::null(),
             WS_OVERLAPPED,
             CW_USEDEFAULT,
@@ -78,16 +76,31 @@ fn main() -> Result<()> {
     }
 }
 
+/// this function processes messages that our window receives. we just do the
+/// default and passthrough to DefWindowProcW.
+/// 
+/// why don't we just use DefWindowProcW directly, you ask? because
+/// DefWindowProcW is unsafe, but the interface for the lpfnWndProc field of the
+/// WNDCLASSW wants a safe function. so we have to wrap it in a safe function.
+/// this might be a bug, at least questionable design. see discussion here:
+///   - https://github.com/microsoft/windows-rs/issues/711
+///   - https://github.com/microsoft/windows-rs/issues/2556
 extern "system" fn wndproc(
     window: HWND,
     message: u32,
     wparam: WPARAM,
-    lparam: LPARAM,
+    lparam: LPARAM
 ) -> LRESULT {
-    // this function just passes through to DefWindowProcW. the lpfnWndProc
-    // field of WNDCLASSW doesn't allow DefWindowProcW though, so we create a
-    // new function pointer that does. this might be a bug. See:
-    //   - https://github.com/microsoft/windows-rs/issues/711
-    //   - https://github.com/microsoft/windows-rs/issues/2556
     unsafe { DefWindowProcW(window, message, wparam, lparam) }
+}
+
+fn main() -> Result<()> {
+    attach_console()?;
+
+    // parse args and sleep for delay
+    let args = Args::parse();
+    let sleep_duration = Duration::from_millis(args.delay.into());
+    sleep(sleep_duration);
+
+    turn_off_monitors()
 }
