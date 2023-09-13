@@ -32,7 +32,7 @@ Running it is then as simple as double-clicking it.
 Run:
 
 ```shell
-scoop bucket add t-mart https://github.com/t-mart/t-mart-scoop-bucket
+scoop bucket add t-mart https://github.com/t-mart/bucket
 scoop install t-mart/monoff
 ```
 
