@@ -4,7 +4,7 @@
 2. Bump the version in `Cargo.toml`.
 3. Commit.
 4. Push.
-5. Create a version variable:
+5. Create a version variable with the new version from `Cargo.toml`:
 
    ```pwsh
    $monoff_version = "<version>"
@@ -22,5 +22,5 @@
    cargo build --release
    cd target/release
    sha256sum monoff.exe > monoff.exe-checksum.sha256.txt
-   gh release create --generate-notes $($monoff_version) target/release/monoff.exe target/release/monoff.exe-checksum.sha256.txt
+   gh release create --generate-notes $($monoff_version) monoff.exe monoff.exe-checksum.sha256.txt
    ```
