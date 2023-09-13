@@ -63,7 +63,7 @@ From here, you can **just click to icon** the turn off your monitors.
 <details>
   <summary>Adding a delay</summary>
 
-  The default delay (50ms) is fine in most cases. But, if you want to add a
+  The default delay (50ms) is fine in most cases. But, if you want to change the
   delay to this shortcut, edit the `Target` value in its properties:
 
   ![edit shortcut arguments](/docs/shortcut-arguments.gif)
