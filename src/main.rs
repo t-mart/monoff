@@ -104,9 +104,9 @@ extern "system" fn window_proc(
     unsafe { DefWindowProcW(window, message, wparam, lparam) }
 }
 
-/// Show a message box. If error, the message box will have an error icon,
-/// otherwise it will have an information icon.
-fn show_message_box(text: &str, caption: &str, error: bool) -> () {
+/// Show a message box with text and a title. If error, the message
+/// box will have an error icon, otherwise it will have an information icon.
+fn show_message_box(text: &str, title: &str, error: bool) -> () {
     let utype = if error {
         MB_ICONERROR | MB_OK
     } else {
@@ -117,7 +117,7 @@ fn show_message_box(text: &str, caption: &str, error: bool) -> () {
         let _ = MessageBoxW(
             None,
             &HSTRING::from(text),
-            &HSTRING::from(caption),
+            &HSTRING::from(title),
             utype,
         );
     }
@@ -132,17 +132,17 @@ fn main() -> ExitCode {
         Ok(args) => args,
         Err(err) => {
             // --help, for example, will have an exit_code() == 0
-            let exit_code_is_error = err.exit_code() != 0;
+            let is_arg_parse_error = err.exit_code() != 0;
             if attach_con_result.is_err() {
                 show_message_box(
                     &err.to_string(),
                     APPLICATION_NAME,
-                    exit_code_is_error,
+                    is_arg_parse_error,
                 );
             } else {
                 let _ = err.print();
             }
-            return match exit_code_is_error {
+            return match is_arg_parse_error {
                 true => ExitCode::FAILURE,
                 false => ExitCode::SUCCESS,
             };
