@@ -130,22 +130,28 @@ fn main() -> ExitCode {
 
     let args = match Args::try_parse() {
         Ok(args) => args,
+
+        // little bit of a misnomer, but an Err can indicate --help or
+        // --version, which are not really errors, but instead indicate we
+        // shouldn't do our normal application logic
         Err(err) => {
-            // --help, for example, will have an exit_code() == 0
-            let is_arg_parse_error = err.exit_code() != 0;
+            // --help, for example, uses stdout, not stderr. implies whether
+            // something has gone wrong or not
+            let is_parse_error = err.use_stderr();
             if attach_con_result.is_err() {
                 show_message_box(
                     &err.to_string(),
                     APPLICATION_NAME,
-                    is_arg_parse_error,
+                    is_parse_error,
                 );
             } else {
                 let _ = err.print();
             }
-            return match is_arg_parse_error {
-                true => ExitCode::FAILURE,
-                false => ExitCode::SUCCESS,
-            };
+            return if is_parse_error {
+                ExitCode::FAILURE
+            } else {
+                ExitCode::SUCCESS
+            }
         }
     };
 
