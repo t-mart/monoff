@@ -27,6 +27,9 @@ use windows::{
 const APPLICATION_NAME: &str = "monoff";
 const DEFAULT_DELAY: u16 = 50;
 
+// See https://learn.microsoft.com/en-us/windows/win32/menurc/wm-syscommand
+const OFF_MONITORPOWER: LPARAM = LPARAM(2);
+
 #[derive(Parser, Debug)]
 #[command(author, version, about, long_about = None)]
 struct Args {
@@ -88,7 +91,7 @@ fn turn_off_monitors() -> Result<()> {
             window,
             WM_SYSCOMMAND,
             WPARAM(SC_MONITORPOWER as usize),
-            LPARAM(2), // 2 = off, -1 = on, 1 = low power
+            OFF_MONITORPOWER,
         )
     }
 }
@@ -105,9 +108,9 @@ extern "system" fn window_proc(
     //
     // Why don't we just use DefWindowProcW directly, you ask? Because
     // DefWindowProcW is unsafe, but the interface for the lpfnWndProc field of
-    // the WNDCLASSW wants a safe function. So, essentially, this is just a
-    // wrapper function that changes the "safety" from unsafe to safe. This
-    // might be a bug, at least questionable design. See discussion here:
+    // the WNDCLASSW wants a safe function. So, essentially, this is just a safe
+    // wrapper function on an unsafe function. This might be a bug, at least
+    // questionable design. See discussion here:
     //   - https://github.com/microsoft/windows-rs/issues/711
     //   - https://github.com/microsoft/windows-rs/issues/2556
     unsafe { DefWindowProcW(window, message, wparam, lparam) }
@@ -136,6 +139,7 @@ fn main() -> ExitCode {
     // this result dictates whether we will show output in the console or in a
     // message box
     let attach_con_result = try_attach_console();
+    let has_console = attach_con_result.is_ok();
 
     let args = match Args::try_parse() {
         Ok(args) => args,
@@ -146,14 +150,14 @@ fn main() -> ExitCode {
         Err(err) => {
             // figure out if we're in one of those non-error scenarios
             let is_parse_error = err.use_stderr();
-            if attach_con_result.is_err() {
+            if has_console {
+                let _ = err.print();
+            } else {
                 show_message_box(
                     &err.to_string(),
                     APPLICATION_NAME,
                     is_parse_error,
                 );
-            } else {
-                let _ = err.print();
             }
             return if is_parse_error {
                 ExitCode::FAILURE
@@ -169,12 +173,11 @@ fn main() -> ExitCode {
     match turn_off_monitors() {
         Ok(()) => ExitCode::SUCCESS,
         Err(err) => {
-            let error_message =
-                format!("Error turning off monitors: {err}");
-            if attach_con_result.is_err() {
-                show_message_box(&error_message, APPLICATION_NAME, true);
-            } else {
+            let error_message = format!("Error turning off monitors: {err}");
+            if has_console {
                 eprintln!("{error_message}");
+            } else {
+                show_message_box(&error_message, APPLICATION_NAME, true);
             }
             ExitCode::FAILURE
         }
