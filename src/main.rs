@@ -1,3 +1,4 @@
+#![warn(clippy::pedantic)]
 // prevent a console window from flashing
 #![windows_subsystem = "windows"]
 
@@ -7,11 +8,19 @@ use std::time::Duration;
 
 use clap::Parser;
 use windows::{
-    core::*,
+    core::{Result, HSTRING, PCWSTR},
     Win32::{
-        Foundation::*,
-        System::{Console::*, LibraryLoader::*},
-        UI::WindowsAndMessaging::*,
+        Foundation::{HWND, LPARAM, LRESULT, WPARAM},
+        System::{
+            Console::{AttachConsole, ATTACH_PARENT_PROCESS},
+            LibraryLoader::GetModuleHandleW,
+        },
+        UI::WindowsAndMessaging::{
+            CreateWindowExW, DefWindowProcW, MessageBoxW, RegisterClassW,
+            SendNotifyMessageW, CW_USEDEFAULT, MB_ICONERROR,
+            MB_ICONINFORMATION, MB_OK, SC_MONITORPOWER, WINDOW_EX_STYLE,
+            WM_SYSCOMMAND, WNDCLASSW, WS_OVERLAPPED,
+        },
     },
 };
 
@@ -135,8 +144,7 @@ fn main() -> ExitCode {
         // --version, which are not really errors, but instead indicate we
         // shouldn't do our normal application logic
         Err(err) => {
-            // --help, for example, uses stdout, not stderr. implies whether
-            // something has gone wrong or not
+            // figure out if we're in one of those non-error scenarios
             let is_parse_error = err.use_stderr();
             if attach_con_result.is_err() {
                 show_message_box(
@@ -151,7 +159,7 @@ fn main() -> ExitCode {
                 ExitCode::FAILURE
             } else {
                 ExitCode::SUCCESS
-            }
+            };
         }
     };
 
