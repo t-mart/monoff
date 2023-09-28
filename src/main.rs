@@ -115,7 +115,7 @@ extern "system" fn window_proc(
 
 /// Show a message box with text and a title. If error, the message
 /// box will have an error icon, otherwise it will have an information icon.
-fn show_message_box(text: &str, title: &str, error: bool) -> () {
+fn show_message_box(text: &str, title: &str, error: bool) {
     let utype = if error {
         MB_ICONERROR | MB_OK
     } else {
@@ -167,14 +167,14 @@ fn main() -> ExitCode {
     sleep(delay_duration);
 
     match turn_off_monitors() {
-        Ok(_) => ExitCode::SUCCESS,
+        Ok(()) => ExitCode::SUCCESS,
         Err(err) => {
             let error_message =
-                format!("Error turning off monitors: {}", err.to_string());
+                format!("Error turning off monitors: {err}");
             if attach_con_result.is_err() {
                 show_message_box(&error_message, APPLICATION_NAME, true);
             } else {
-                eprintln!("{}", error_message);
+                eprintln!("{error_message}");
             }
             ExitCode::FAILURE
         }
