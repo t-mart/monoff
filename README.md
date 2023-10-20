@@ -10,8 +10,7 @@ move your mouse or press a key on the keyboard, they'll turn back on again.
 inactive for however many minutes. Click it, and the monitors turn off.
 - **Portable**: Everything about it is self-contained in the .exe and does not
 require an installer. You can even run it from a USB stick.
-- **Convenient**: I wrote this program because I purchased some monitors whose
-power switches were hard to reach. Now, I can just click an icon in my taskbar.
+- **Convenient**: Just click an icon in your taskbar, or press a keyboard shortcut. I made this program because the power button on my monitors is hard to reach.
 - **Safe**: This program is open-source, and you can inspect the code and build it yourself.
 
 You can also specify a delay before the monitors turn off, so that you can
@@ -60,11 +59,25 @@ As normal, just drag the application to your taskbar:
 
 From here, you can **just click to icon** the turn off your monitors.
 
+### Adding a hotkey/keyboard shortcut
+
 <details>
-  <summary>Adding a delay</summary>
+  <summary>Expand</summary>
+
+  To run the application when you press a hotkey/keyboard shortcut, edit the `Shortcut Key` value in its properties:
+
+  ![edit shortcut arguments](/docs/hotkey.gif)
+
+  Note that Windows will automatically prefix your choice with `Ctrl + Alt`. You only can only provide the last key.
+</details>
+
+### Adding a delay
+
+<details>
+  <summary>Expand</summary>
 
   The default delay (50ms) is fine in most cases. But, if you want to change the
-  delay to this shortcut, edit the `Target` value in its properties:
+  delay to this shortcut, edit the `Target` value in its properties to add the delay option:
 
   ![edit shortcut arguments](/docs/shortcut-arguments.gif)
 </details>
