@@ -225,6 +225,7 @@ impl MessageConsole {
     }
 }
 
+#[cfg(target_os = "windows")]
 fn main() -> ExitCode {
     // this result dictates whether we will show output in the console or in a
     // message box
@@ -251,4 +252,9 @@ fn main() -> ExitCode {
             ExitCode::FAILURE
         }
     }
+}
+
+#[cfg(not(target_os = "windows"))]
+fn main() {
+    eprintln!("This program is only intended to run on Windows.");
 }
