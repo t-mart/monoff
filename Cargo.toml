@@ -6,7 +6,7 @@ edition = "2021"
 description = "Turns off monitors on Windows"
 
 [dependencies]
-clap = { version = "4.4.2", features = ["derive"] }
+clap = { version = "4.5.1", features = ["derive"] }
 
 [dependencies.windows]
 version = "0.54"
