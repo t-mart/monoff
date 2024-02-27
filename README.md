@@ -110,3 +110,16 @@ This program is heavily inspired by [lcdoff-rs](https://github.com/Gekkio/lcdoff
   little easier/idiomatic to work with
 - accepts a delay parameter, the amount of time to wait before powering the monitors off
 - has a representative icon
+
+## DevOps
+
+To:
+
+- create and push a new git tag,
+- create a new GitHub release with binaries attached, and
+- publish a new version to <https://crates.io> (and update docs on
+  <https://docs.rs>)
+
+simply push a commit to the `master` branch with an updated version number in
+`Cargo.toml`. The workflow file at `.github/workflows/release-build-publish.yml`
+will take care of the rest. Make sure to pull afterwards.
