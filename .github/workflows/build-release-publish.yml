@@ -1,0 +1,165 @@
+name: Build + Release + Publish
+
+# Workflow Overview
+#
+# This workflow is triggered when:
+# - A commit is pushed to the master branch that changes Cargo.toml's version
+# - A user manually triggers the workflow
+#
+# If that's so, then we:
+# - Determine if we need to release by seeing if there's a git tag with the
+#   cargo version. (If that tag exists, we don't need to release, presumably
+#   because this workflow has already run.)
+# - If we need to release:
+#   - Build the project into a binary
+#   - Create checksums file
+#   - Create a GitHub release with the binary and checksum file as assets
+#   - Publish to crates.io
+
+env:
+  crate_name: monoff
+  target_triple: x86_64-pc-windows-msvc
+  source_path: source
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - "Cargo.toml"
+  workflow_dispatch:
+
+jobs:
+  tag:
+    permissions:
+      contents: write
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-tags: true
+          fetch-depth: 0
+          path: ${{ env.source_path }}
+
+      - name: Extract version from Cargo.toml
+        id: extract_version
+        run: |
+          cd ${{ env.source_path }}
+          CARGO_METADATA=$(cargo metadata --format-version 1 --no-deps)
+          CARGO_VERSION=$(echo "${CARGO_METADATA}" | jq -r '.packages[] | select(.name == "${crate_name}") | .version')
+
+          if [ -z "${CARGO_VERSION}" ]; then
+            echo "CARGO_VERSION should not be empty, likely problem with metadata or jq command"
+            exit 1
+          fi
+
+          echo "Extracted version: ${CARGO_VERSION}"
+          echo "::notice title=Cargo Version::${CARGO_VERSION}"
+          echo "cargo_version=${CARGO_VERSION}" >> "$GITHUB_OUTPUT"
+
+      # some possibility for race condition here, but not a problem unless we're spamming this action
+      - name: Create tag
+        id: create_tag
+        run: |
+          cd ${{ env.source_path }}
+          TAG_NAME="v${{ steps.extract_version.outputs.cargo_version }}"
+          echo "name=${TAG_NAME}" >> "$GITHUB_OUTPUT"
+          echo "::notice title=Tag Name::${TAG_NAME}"
+
+          REF="refs/tags/${TAG_NAME}"
+          if git rev-parse -q --verify "${REF}"; then
+            NEEDS_BUILD=false
+            echo "Tag v$VERSION already exists, skipping release"
+          else
+            NEEDS_BUILD=true
+            git config --global user.name "${GITHUB_ACTOR}"
+            git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+            git tag -a -m "Release ${TAG_NAME}" "${TAG_NAME}"
+            git push origin "${TAG_NAME}"
+          fi
+
+          echo "::notice title=Needs Build::${NEEDS_BUILD}"
+          echo "needs_build=${NEEDS_BUILD}" >> "$GITHUB_OUTPUT"
+
+      - name: Add target triple
+        run: |
+          rustup target add ${{ env.target_triple }}
+
+      - name: Cache cargo registry and target
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ${{ env.source_path }}/target/
+          key: ${{ env.crate_name }}-${{ steps.create_tag.outputs.name }}
+          restore-keys: |
+            ${{ env.crate_name }}-
+
+      - name: Test
+        run: |
+          cd ${{ env.source_path }}
+          cargo test --target ${{ env.target_triple }}
+
+      - name: Build
+        run: |
+          cd ${{ env.source_path }}
+          cargo build --release --target ${{ env.target_triple }}
+
+      - name: Archive
+        id: archive
+        run: |
+          mkdir -p assets
+          ASSETS_PATH=$(realpath ./assets)
+          echo "assets_path=${ASSETS_PATH}" >> "$GITHUB_OUTPUT"
+
+          # the path to the archive we'll create
+          ARCHIVE_PATH=${ASSETS_PATH}/${{ env.crate_name }}-${{ env.target_triple }}-${{ steps.create_tag.outputs.name }}.zip
+
+          # the filename of the binary
+          BINARY_FILENAME=${{ env.crate_name }}.exe
+
+          # the relative path of the directory of the binary
+          BINARY_DIR_PATH=${{ env.source_path }}/target/${{ env.target_triple }}/release
+
+          # go to the binary dir path, so we don't get directory structure in the archive
+          cd $BINARY_DIR_PATH
+
+          # create the archive
+          7z a -mx9 "${ARCHIVE_PATH}" "${BINARY_FILENAME}"
+
+      - name: Generate checksums
+        id: gen_checksums
+        run: |
+          cd ${{ steps.archive.outputs.assets_path }}
+
+          CHECKSUMS_PATH=${{ steps.archive.outputs.assets_path }}/sha256sums.txt
+          sha256sum ${{ steps.archive.outputs.archive_path }} > "${CHECKSUMS_PATH}"
+      
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cd ${{ env.source_path }}
+          TAG_NAME=${{ steps.create_tag.outputs.name }}
+          URL=$(gh release create "${TAG_NAME}" \
+            -t "Release ${TAG_NAME}" \
+            --verify-tag \
+            --generate-notes)
+          echo "::notice title=Release URL::${URL}"
+          
+          cd ${{ steps.archive.outputs.assets_path }}
+          gh release upload "${TAG_NAME}" *
+
+      - name: Publish to crates.io
+        run: |
+          cd ${{ env.source_path }}
+          cargo publish
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+
+      - name: Show crates.io URL
+        run: |
+          echo "::notice title=crates.io URL::https://crates.io/crates/${{ env.crate_name }}/${{ steps.extract_version.outputs.cargo_version }}"
