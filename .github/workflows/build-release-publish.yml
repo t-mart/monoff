@@ -155,7 +155,7 @@ jobs:
       - name: Publish to crates.io
         run: |
           cd ${{ env.source_path }}
-          cargo publish
+          cargo publish --target ${{ env.target_triple }}
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
 
