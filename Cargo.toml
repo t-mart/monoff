@@ -9,7 +9,7 @@ description = "Turns off monitors on Windows"
 clap = { version = "4.4.2", features = ["derive"] }
 
 [dependencies.windows]
-version = "0.51"
+version = "0.54"
 features = [
     "Win32_Foundation",
     "Win32_Graphics_Gdi",
