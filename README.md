@@ -14,7 +14,7 @@ require an installer. You can even run it from a USB stick.
 - **Safe**: This program is open-source, and you can inspect the code and build it yourself.
 
 You can also specify a delay before the monitors turn off, so that you can
-safely remove your hand from your mouse, for example. It defaults to 50 milliseconds.
+safely remove your hand from your mouse, for example. It defaults to 100 milliseconds.
 
 ## Installation
 
@@ -104,12 +104,25 @@ From here, you can **just click to icon** the turn off your monitors.
 
 ## Thanks
 
-This program is heavily inspired by [lcdoff-rs](https://github.com/Gekkio/lcdoff-rs) (and its partner [article](https://gekkio.fi/blog/2014/calling-win32-api-with-rust-ffi/)), but with a few differences:
+This program is heavily inspired by
+[lcdoff-rs](https://github.com/Gekkio/lcdoff-rs) (and its partner
+[article](https://gekkio.fi/blog/2014/calling-win32-api-with-rust-ffi/)), but
+with a few differences:
 
 - uses the [`windows`](https://crates.io/crates/windows) crate, which is a
   little easier/idiomatic to work with
-- accepts a delay parameter, the amount of time to wait before powering the monitors off
+- accepts a delay parameter, the amount of time to wait before powering the
+  monitors off
 - has a representative icon
+
+## Other Projects Named monoff
+
+After creating this `monoff` project, I found that there are several others with
+the same name. This monoff is not affiliated with any of them. The only official
+pages related to this project are:
+
+- [GitHub](https://github.com/t-mart/monoff)
+- [Crates.io](https://crates.io/crates/monoff)
 
 ## DevOps
 
