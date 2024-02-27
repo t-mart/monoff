@@ -49,7 +49,7 @@ jobs:
         run: |
           cd ${{ env.source_path }}
           CARGO_METADATA=$(cargo metadata --format-version 1 --no-deps)
-          CARGO_VERSION=$(echo "${CARGO_METADATA}" | jq -r '.packages[] | select(.name == "${crate_name}") | .version')
+          CARGO_VERSION=$(echo "${CARGO_METADATA}" | jq -r '.packages[] | select(.name == "${{ env.crate_name }}") | .version')
 
           if [ -z "${CARGO_VERSION}" ]; then
             echo "CARGO_VERSION should not be empty, likely problem with metadata or jq command"
