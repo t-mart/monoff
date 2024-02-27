@@ -22,7 +22,7 @@ use windows::{
 };
 
 const APPLICATION_NAME: &str = "monoff";
-const DEFAULT_DELAY: u16 = 50;
+const DEFAULT_DELAY_MS: u16 = 100;
 
 // See https://learn.microsoft.com/en-us/windows/win32/menurc/wm-syscommand
 const OFF_MONITORPOWER: LPARAM = LPARAM(2);
@@ -34,7 +34,7 @@ struct Args {
     #[arg(
         short,
         long,
-        default_value_t = DEFAULT_DELAY,
+        default_value_t = DEFAULT_DELAY_MS,
         value_parser = clap::value_parser!(u16).range(0..)
     )]
     delay: u16,
