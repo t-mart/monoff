@@ -150,8 +150,7 @@ jobs:
             --generate-notes)
           echo "::notice title=Release URL::${URL}"
           
-          cd ${{ steps.archive.outputs.assets_path }}
-          gh release upload "${TAG_NAME}" *
+          gh release upload "${TAG_NAME}" ${{ steps.archive.outputs.assets_path }}/*
 
       - name: Publish to crates.io
         run: |
