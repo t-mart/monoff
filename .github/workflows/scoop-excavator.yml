@@ -3,7 +3,7 @@ on:
   schedule:
     # run every 4 hours
     - cron: '20 */4 * * *'
-name: Excavator
+name: Scoop Excavator
 jobs:
   excavate:
     name: Excavate
