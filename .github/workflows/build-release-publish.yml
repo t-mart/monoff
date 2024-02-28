@@ -110,14 +110,27 @@ jobs:
     defaults:
       run:
         shell: bash
-    env:
-      source_path: ${{ github.workspace }}/source
-      assets_path: ${{ github.workspace }}/assets
     steps:
+      # Below in the `publish_release` step, we make env vars with our source
+      # and assets paths. I attempted to do that here too, but the issue with
+      # path separators: On Windows, they're single backslashes, and I think
+      # when bash sees those, it thinks it's an escape character. So instead,
+      # we create them in-environment here -- they should then be properly
+      # escaped.
+      - name: Setup paths
+        id: paths
+        run: |
+          SOURCE_PATH=${{ github.workspace }}/source
+          echo "source_path=${SOURCE_PATH}/source" >> "$GITHUB_OUTPUT"
+
+          ASSETS_PATH=${{ github.workspace }}/assets
+          mkdir -p $ASSETS_PATH
+          echo "assets_path=${ASSETS_PATH}/assets" >> "$GITHUB_OUTPUT"
+      
       - uses: actions/checkout@v4
         with:
           ref: ${{ needs.tag.outputs.name }}
-          path: ${{ env.source_path }}
+          path: ${{ steps.paths.outputs.source_path }}
 
       - name: Add target triple
         run: |
@@ -128,52 +141,51 @@ jobs:
         with:
           path: |
             ~/.cargo/registry
-            ${{ env.source_path }}/target/
+            ${{ steps.paths.outputs.source_path }}/target/
           key: ${{ env.crate_name }}-${{ needs.tag.outputs.name }}
           restore-keys: |
             ${{ env.crate_name }}-
 
       - name: Test
-        working-directory: ${{ env.source_path }}
+        working-directory: ${{ steps.paths.outputs.source_path }}
         run: cargo test --target ${{ env.target_triple }}
 
       - name: Build
-        working-directory: ${{ env.source_path }}
+        working-directory: ${{ steps.paths.outputs.source_path }}
         run: cargo build --release --target ${{ env.target_triple }}
 
       - name: Archive
         id: archive
         run: |
           # the path to the archive we'll create
-          ARCHIVE_PATH=${{ env.assets_path }}/${{ env.crate_name }}-${{ env.target_triple }}-${{ needs.tag.outputs.name }}.zip
+          ARCHIVE_PATH=${{ steps.paths.outputs.assets_path }}/${{ env.crate_name }}-${{ env.target_triple }}-${{ needs.tag.outputs.name }}.zip
           echo "archive_path=${ARCHIVE_PATH}" >> "$GITHUB_OUTPUT"
 
           # the filename of the binary
           BINARY_FILENAME=${{ env.crate_name }}.exe
 
           # the relative path of the directory of the binary
-          BINARY_DIR_PATH=${{ env.source_path }}/target/${{ env.target_triple }}/release
+          BINARY_DIR_PATH=${{ steps.paths.outputs.source_path }}/target/${{ env.target_triple }}/release
 
           # go to the binary dir path, so we don't get directory structure in the archive
           cd $BINARY_DIR_PATH
 
           # create the archive
-          mkdir -p ${{ env.assets_path }}
+          mkdir -p ${{ steps.paths.outputs.assets_path }}
           7z a -mx9 "${ARCHIVE_PATH}" "${BINARY_FILENAME}"
 
       - name: Generate checksums
         id: gen_checksums
-        working-directory: ${{ env.assets_path }}
+        working-directory: ${{ steps.paths.outputs.assets_path }}
         run: |
           CHECKSUMS_PATH=sha256sums.txt
           sha256sum ${{ steps.archive.outputs.archive_path }} > "${CHECKSUMS_PATH}"
-
       
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: ${{ env.artifact_name }}
-          path: ${{ env.assets_path }}
+          path: ${{ steps.paths.outputs.assets_path }}
 
   publish_release:
     permissions:
