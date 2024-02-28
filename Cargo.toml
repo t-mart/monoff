@@ -1,7 +1,7 @@
 [package]
 name = "monoff"
 authors = ["Tim Martin"]
-version = "0.4.3"
+version = "0.4.4"
 edition = "2021"
 description = "Turns off monitors on Windows"
 license = "MIT"
