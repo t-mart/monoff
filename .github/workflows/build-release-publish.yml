@@ -72,8 +72,6 @@ jobs:
         run: |
           DRY_RUN="${{ inputs.dry_run }}"
           echo "::notice title=Dry Run::${DRY_RUN}"
-          echo "Dry run: ${DRY_RUN}"
-          exit 1
 
           # default value
           NEEDS_BUILD=true
