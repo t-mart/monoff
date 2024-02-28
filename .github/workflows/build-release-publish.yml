@@ -19,7 +19,7 @@ name: Build + Release + Publish
 env:
   crate_name: monoff
   target_triple: x86_64-pc-windows-msvc
-  source_path: source
+  artifact_name: assets
 
 on:
   push:
@@ -28,26 +28,33 @@ on:
     paths:
       - "Cargo.toml"
   workflow_dispatch:
+    # offer option to dry run, such that nothing external to this workflow
+    # changes. i.e., no git tag, no release, no publish. helpful for testing
+    inputs:
+      dry_run:
+        description: 'Perform a dry-run, skipping the release and publish steps?'
+        required: false
+        default: false
+        type: boolean
 
 jobs:
   tag:
     permissions:
       contents: write
-    runs-on: windows-latest
-    defaults:
-      run:
-        shell: bash
+    runs-on: ubuntu-latest
+    outputs:
+      needs_build: ${{ steps.create_tag.outputs.needs_build }}
+      name: ${{ steps.create_tag.outputs.name }}
+      cargo_version: ${{ steps.extract_version.outputs.cargo_version }}
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-tags: true
           fetch-depth: 0
-          path: ${{ env.source_path }}
 
       - name: Extract version from Cargo.toml
         id: extract_version
         run: |
-          cd ${{ env.source_path }}
           CARGO_METADATA=$(cargo metadata --format-version 1 --no-deps)
           CARGO_VERSION=$(echo "${CARGO_METADATA}" | jq -r '.packages[] | select(.name == "${{ env.crate_name }}") | .version')
 
@@ -60,29 +67,57 @@ jobs:
           echo "::notice title=Cargo Version::${CARGO_VERSION}"
           echo "cargo_version=${CARGO_VERSION}" >> "$GITHUB_OUTPUT"
 
-      # some possibility for race condition here, but not a problem unless we're spamming this action
       - name: Create tag
         id: create_tag
         run: |
-          cd ${{ env.source_path }}
-          TAG_NAME="v${{ steps.extract_version.outputs.cargo_version }}"
+          DRY_RUN="${{ inputs.dry_run }}"
+          echo "::notice title=Dry Run::${DRY_RUN}"
+
+          # default value
+          NEEDS_BUILD=true
+
+          if [ "${DRY_RUN}" != 'true' ]; then
+            TAG_NAME="v${{ steps.extract_version.outputs.cargo_version }}"
+
+            REF="refs/tags/${TAG_NAME}"
+            if git rev-parse -q --verify "${REF}"; then
+              NEEDS_BUILD=false
+              echo "Tag v$VERSION already exists, skipping release"
+            else
+              git config --global user.name "${GITHUB_ACTOR}"
+              git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+
+              git tag -a -m "Release ${TAG_NAME}" "${TAG_NAME}"
+              git push origin "${TAG_NAME}"
+            fi
+
+          else
+            echo "Dry run, using current ref as tag name"
+            TAG_NAME="${{ github.ref }}"
+          fi
+
           echo "name=${TAG_NAME}" >> "$GITHUB_OUTPUT"
           echo "::notice title=Tag Name::${TAG_NAME}"
 
-          REF="refs/tags/${TAG_NAME}"
-          if git rev-parse -q --verify "${REF}"; then
-            NEEDS_BUILD=false
-            echo "Tag v$VERSION already exists, skipping release"
-          else
-            NEEDS_BUILD=true
-            git config --global user.name "${GITHUB_ACTOR}"
-            git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
-            git tag -a -m "Release ${TAG_NAME}" "${TAG_NAME}"
-            git push origin "${TAG_NAME}"
-          fi
-
           echo "::notice title=Needs Build::${NEEDS_BUILD}"
           echo "needs_build=${NEEDS_BUILD}" >> "$GITHUB_OUTPUT"
+
+  build:
+    needs:
+      - tag
+    if: needs.tag.outputs.needs_build == 'true'
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: bash
+    env:
+      source_path: ${{ github.workspace }}/source
+      assets_path: ${{ github.workspace }}/assets
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.tag.outputs.name }}
+          path: ${{ env.source_path }}
 
       - name: Add target triple
         run: |
@@ -94,71 +129,95 @@ jobs:
           path: |
             ~/.cargo/registry
             ${{ env.source_path }}/target/
-          key: ${{ env.crate_name }}-${{ steps.create_tag.outputs.name }}
+          key: ${{ env.crate_name }}-${{ needs.tag.outputs.name }}
           restore-keys: |
             ${{ env.crate_name }}-
 
       - name: Test
-        run: |
-          cd ${{ env.source_path }}
-          cargo test --target ${{ env.target_triple }}
+        working-directory: ${{ env.source_path }}
+        run: cargo test --target ${{ env.target_triple }}
 
       - name: Build
-        run: |
-          cd ${{ env.source_path }}
-          cargo build --release --target ${{ env.target_triple }}
+        working-directory: ${{ env.source_path }}
+        run: cargo build --release --target ${{ env.target_triple }}
 
       - name: Archive
         id: archive
         run: |
-          mkdir -p assets
-          ASSETS_PATH=$(realpath ./assets)
-          echo "assets_path=${ASSETS_PATH}" >> "$GITHUB_OUTPUT"
-
           # the path to the archive we'll create
-          ARCHIVE_PATH=${ASSETS_PATH}/${{ env.crate_name }}-${{ env.target_triple }}-${{ steps.create_tag.outputs.name }}.zip
+          ARCHIVE_PATH=${{ env.assets_path }}/${{ env.crate_name }}-${{ env.target_triple }}-${{ needs.tag.outputs.name }}.zip
+          echo "archive_path=${ARCHIVE_PATH}" >> "$GITHUB_OUTPUT"
 
           # the filename of the binary
           BINARY_FILENAME=${{ env.crate_name }}.exe
 
           # the relative path of the directory of the binary
-          BINARY_DIR_PATH=${{ env.source_path }}/target/${{ env.target_triple }}/release
+          BINARY_DIR_PATH=${{ env.source_path }}/${{ env.source_path }}/target/${{ env.target_triple }}/release
 
           # go to the binary dir path, so we don't get directory structure in the archive
           cd $BINARY_DIR_PATH
 
           # create the archive
+          mkdir -p ${{ env.assets_path }}
           7z a -mx9 "${ARCHIVE_PATH}" "${BINARY_FILENAME}"
 
       - name: Generate checksums
         id: gen_checksums
+        working-directory: ${{ env.assets_path }}
         run: |
-          cd ${{ steps.archive.outputs.assets_path }}
-
-          CHECKSUMS_PATH=${{ steps.archive.outputs.assets_path }}/sha256sums.txt
+          CHECKSUMS_PATH=sha256sums.txt
           sha256sum ${{ steps.archive.outputs.archive_path }} > "${CHECKSUMS_PATH}"
+
       
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.artifact_name }}
+          path: ${{ env.assets_path }}
+
+  publish_release:
+    permissions:
+      contents: write
+    if: inputs.dry_run != 'true'
+    needs:
+      - tag
+      - build
+    runs-on: ubuntu-latest
+    env:
+      source_path: ${{ github.workspace }}/source
+      assets_path: ${{ github.workspace }}/assets
+    steps:   
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.tag.outputs.name }}
+          path: ${{ env.source_path }} 
+      
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ env.artifact_name }}
+          path: ${{ env.assets_path }}
+
       - name: Create GitHub release
+        if: inputs.dry_run != 'true'
         env:
           GH_TOKEN: ${{ github.token }}
+        working-directory: ${{ env.source_path }}
         run: |
-          cd ${{ env.source_path }}
-          TAG_NAME=${{ steps.create_tag.outputs.name }}
+          TAG_NAME=${{ needs.tag.outputs.name }}
           URL=$(gh release create "${TAG_NAME}" \
             -t "Release ${TAG_NAME}" \
             --verify-tag \
             --generate-notes)
           echo "::notice title=Release URL::${URL}"
           
-          gh release upload "${TAG_NAME}" ${{ steps.archive.outputs.assets_path }}/*
+          gh release upload "${TAG_NAME}" "${{ env.assets_path }}/*"
 
       - name: Publish to crates.io
+        if: inputs.dry_run != 'true'
+        working-directory: ${{ env.source_path }}
         run: |
-          cd ${{ env.source_path }}
-          cargo publish --target ${{ env.target_triple }}
+          cargo publish --target ${{ env.target_triple }} --no-verify
+          echo "::notice title=crates.io URL::https://crates.io/crates/${{ env.crate_name }}/${{ needs.tag.outputs.cargo_version }}"
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
-
-      - name: Show crates.io URL
-        run: |
-          echo "::notice title=crates.io URL::https://crates.io/crates/${{ env.crate_name }}/${{ steps.extract_version.outputs.cargo_version }}"
