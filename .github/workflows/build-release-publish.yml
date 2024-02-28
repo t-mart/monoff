@@ -152,7 +152,7 @@ jobs:
           BINARY_FILENAME=${{ env.crate_name }}.exe
 
           # the relative path of the directory of the binary
-          BINARY_DIR_PATH=${{ env.source_path }}/${{ env.source_path }}/target/${{ env.target_triple }}/release
+          BINARY_DIR_PATH=${{ env.source_path }}/target/${{ env.target_triple }}/release
 
           # go to the binary dir path, so we don't get directory structure in the archive
           cd $BINARY_DIR_PATH
