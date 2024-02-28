@@ -121,11 +121,11 @@ jobs:
         id: paths
         run: |
           SOURCE_PATH=${{ github.workspace }}/source
-          echo "source_path=${SOURCE_PATH}/source" >> "$GITHUB_OUTPUT"
+          echo "source_path=${SOURCE_PATH}" >> "$GITHUB_OUTPUT"
 
           ASSETS_PATH=${{ github.workspace }}/assets
           mkdir -p $ASSETS_PATH
-          echo "assets_path=${ASSETS_PATH}/assets" >> "$GITHUB_OUTPUT"
+          echo "assets_path=${ASSETS_PATH}" >> "$GITHUB_OUTPUT"
       
       - uses: actions/checkout@v4
         with:
