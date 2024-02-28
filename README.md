@@ -1,4 +1,4 @@
-# ![monoff](docs/monoff.png) monoff - Turn off your monitors on Windows
+# ![monoff](https://raw.githubusercontent.com/t-mart/monoff/master/docs/monoff.png) monoff - Turn off your monitors on Windows
 
 ![GitHub download count](https://img.shields.io/github/downloads/t-mart/monoff/total)
 ![Latest GitHub release](https://img.shields.io/github/v/release/t-mart/monoff)
