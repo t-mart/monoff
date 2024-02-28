@@ -32,7 +32,7 @@ on:
     # changes. i.e., no git tag, no release, no publish. helpful for testing
     inputs:
       dry_run:
-        description: 'Perform a dry-run, skipping the release and publish steps?'
+        description: 'Perform a dry-run, skipping tagging, releasing and publishing?'
         required: false
         default: false
         type: boolean
