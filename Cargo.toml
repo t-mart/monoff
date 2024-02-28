@@ -1,10 +1,15 @@
 [package]
 name = "monoff"
 authors = ["Tim Martin"]
-version = "0.4.5"
+repository = "https://github.com/t-mart/monoff"
+documentation = "https://docs.rs/monoff"
+homepage = "https://github.com/t-mart/monoff"
+version = "0.4.6"
 edition = "2021"
 description = "Turns off monitors on Windows"
 license = "MIT"
+keywords = ["monitor", "display", "off", "windows"]
+categories = ["accessibility", "command-line-utilities", "hardware-support"]
 
 [dependencies]
 clap = { version = "4.5.1", features = ["derive"] }

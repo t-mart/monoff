@@ -1,4 +1,7 @@
+//! A simple program to turn off the monitors on Windows.
 #![warn(clippy::pedantic)]
+#![warn(missing_docs)]
+#![warn(clippy::cargo)]
 // prevent a console window from flashing
 #![windows_subsystem = "windows"]
 

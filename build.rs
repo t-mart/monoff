@@ -1,3 +1,7 @@
+//! This file is used to compile the icon into the executable.
+#![warn(missing_docs)]
+#![warn(clippy::pedantic)]
+
 use {
     std::{env, io},
     winres::WindowsResource,
