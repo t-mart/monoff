@@ -21,3 +21,6 @@ features = [
 
 [build-dependencies]
 winres = "0.1.12"
+
+[package.metadata.binstall.overrides.x86_64-pc-windows-msvc]
+pkg-fmt = "zip"
