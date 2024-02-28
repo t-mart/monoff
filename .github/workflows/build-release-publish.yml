@@ -190,7 +190,7 @@ jobs:
   publish_release:
     permissions:
       contents: write
-    if: inputs.dry_run != 'true'
+    if: !inputs.dry_run
     needs:
       - tag
       - build
