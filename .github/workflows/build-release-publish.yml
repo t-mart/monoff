@@ -93,7 +93,7 @@ jobs:
 
           else
             echo "Dry run, using current ref as tag name"
-            TAG_NAME="${{ github.ref }}"
+            TAG_NAME="${{ github.sha }}"
           fi
 
           echo "name=${TAG_NAME}" >> "$GITHUB_OUTPUT"
