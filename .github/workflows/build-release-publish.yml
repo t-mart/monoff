@@ -120,10 +120,10 @@ jobs:
       - name: Setup paths
         id: paths
         run: |
-          SOURCE_PATH=$(realpath ./source)
+          SOURCE_PATH=./source
           echo "source_path=${SOURCE_PATH}" >> "$GITHUB_OUTPUT"
 
-          ASSETS_PATH=$(realpath ./assets)
+          ASSETS_PATH=./assets
           mkdir -p $ASSETS_PATH
           echo "assets_path=${ASSETS_PATH}" >> "$GITHUB_OUTPUT"
       
@@ -158,8 +158,7 @@ jobs:
         id: archive
         run: |
           # the path to the archive we'll create
-          ARCHIVE_PATH=${{ steps.paths.outputs.assets_path }}/${{ env.crate_name }}-${{ env.target_triple }}-${{ needs.tag.outputs.name }}.zip
-          echo "archive_path=${ARCHIVE_PATH}" >> "$GITHUB_OUTPUT"
+          ARCHIVE_FILENAME=${{ env.crate_name }}-${{ env.target_triple }}-${{ needs.tag.outputs.name }}.zip
 
           # the filename of the binary
           BINARY_FILENAME=${{ env.crate_name }}.exe
@@ -172,14 +171,15 @@ jobs:
 
           # create the archive
           mkdir -p ${{ steps.paths.outputs.assets_path }}
-          7z a -mx9 "${ARCHIVE_PATH}" "${BINARY_FILENAME}"
+          7z a -mx9 "${ARCHIVE_FILENAME}" "${BINARY_FILENAME}"
+          mv "${ARCHIVE_FILENAME}" ../../../../${{ steps.paths.outputs.assets_path }}
 
       - name: Generate checksums
         id: gen_checksums
         working-directory: ${{ steps.paths.outputs.assets_path }}
         run: |
           CHECKSUMS_PATH=sha256sums.txt
-          sha256sum ${{ steps.archive.outputs.archive_path }} > "${CHECKSUMS_PATH}"
+          sha256sum * > "${CHECKSUMS_PATH}"
       
       - name: Upload artifact
         uses: actions/upload-artifact@v4
