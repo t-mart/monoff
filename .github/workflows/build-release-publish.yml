@@ -120,10 +120,10 @@ jobs:
       - name: Setup paths
         id: paths
         run: |
-          SOURCE_PATH=${{ github.workspace }}/source
+          SOURCE_PATH=$(realpath ./source)
           echo "source_path=${SOURCE_PATH}" >> "$GITHUB_OUTPUT"
 
-          ASSETS_PATH=${{ github.workspace }}/assets
+          ASSETS_PATH=$(realpath ./assets)
           mkdir -p $ASSETS_PATH
           echo "assets_path=${ASSETS_PATH}" >> "$GITHUB_OUTPUT"
       
