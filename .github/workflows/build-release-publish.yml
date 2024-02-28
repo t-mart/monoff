@@ -190,7 +190,7 @@ jobs:
   publish_release:
     permissions:
       contents: write
-    if: !inputs.dry_run
+    if: ${{ !inputs.dry_run }}
     needs:
       - tag
       - build
@@ -211,7 +211,6 @@ jobs:
           path: ${{ env.assets_path }}
 
       - name: Create GitHub release
-        if: inputs.dry_run != 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         working-directory: ${{ env.source_path }}
@@ -226,7 +225,6 @@ jobs:
           gh release upload "${TAG_NAME}" "${{ env.assets_path }}/*"
 
       - name: Publish to crates.io
-        if: inputs.dry_run != 'true'
         working-directory: ${{ env.source_path }}
         run: |
           cargo publish --target ${{ env.target_triple }} --no-verify
