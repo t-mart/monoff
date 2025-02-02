@@ -1,4 +1,4 @@
-# ![monoff](https://raw.githubusercontent.com/t-mart/monoff/master/docs/monoff.png) monoff - Turn off your monitors on Windows
+# <img src="./docs/monoff.png" width="64px" alt="monoff logo of a computer screen displaying crescent moon"> monoff - Turn off your monitors on Windows
 
 ![GitHub download count](https://img.shields.io/github/downloads/t-mart/monoff/total)
 ![Latest GitHub release](https://img.shields.io/github/v/release/t-mart/monoff)
@@ -26,9 +26,9 @@ milliseconds.
 
 ### From GitHub (easiest)
 
-Download `monoff.exe` from the [latest
-release](https://github.com/t-mart/monoff/releases/latest) and put it somewhere,
-such as on your Desktop.
+Download `monoff.exe` from the
+[latest release](https://github.com/t-mart/monoff/releases/latest) and put it
+somewhere, such as on your Desktop.
 
 Running it is then as simple as double-clicking it.
 
@@ -55,13 +55,14 @@ Run:
 cargo install monoff
 ```
 
-This will build the executable and place it at `%UserProfile%\.cargo\bin\monoff.exe` (and,
-most likely, put it in your `PATH` variable).
+This will build the executable and place it at
+`%UserProfile%\.cargo\bin\monoff.exe` (and, most likely, put it in your `PATH`
+variable).
 
 #### Binstall
 
-You can also use [binstall](https://github.com/cargo-bins/cargo-binstall) to install
-the latest GitHub release without needing to build. Run:
+You can also use [binstall](https://github.com/cargo-bins/cargo-binstall) to
+install the latest GitHub release without needing to build. Run:
 
 ```shell
 cargo binstall monoff
@@ -80,13 +81,14 @@ From here, you can **just click to icon** the turn off your monitors.
 <details>
   <summary>Expand</summary>
 
-  To run the application when you press a hotkey/keyboard shortcut, edit the
-  `Shortcut Key` value in its properties:
+To run the application when you press a hotkey/keyboard shortcut, edit the
+`Shortcut Key` value in its properties:
 
-  ![edit shortcut arguments](https://raw.githubusercontent.com/t-mart/monoff/master/docs/hotkey.gif)
+![edit shortcut arguments](https://raw.githubusercontent.com/t-mart/monoff/master/docs/hotkey.gif)
 
-  Note that Windows will automatically prefix your choice with `Ctrl + Alt`. You
-  only can only provide the last key.
+Note that Windows will automatically prefix your choice with `Ctrl + Alt`. You
+only can only provide the last key.
+
 </details>
 
 ### Adding a delay
@@ -94,11 +96,12 @@ From here, you can **just click to icon** the turn off your monitors.
 <details>
   <summary>Expand</summary>
 
-  The default delay (50ms) is fine in most cases. But, if you want to change the
-  delay to this shortcut, edit the `Target` value in its properties to add the
-  delay option:
+The default delay (50ms) is fine in most cases. But, if you want to change the
+delay to this shortcut, edit the `Target` value in its properties to add the
+delay option:
 
-  ![edit shortcut arguments](https://raw.githubusercontent.com/t-mart/monoff/master/docs/shortcut-arguments.gif)
+![edit shortcut arguments](https://raw.githubusercontent.com/t-mart/monoff/master/docs/shortcut-arguments.gif)
+
 </details>
 
 ## Usage examples
