@@ -20,6 +20,3 @@ The process for producing this file is as follows:
 
 3. Locate this icon from the list displayed, icon #101. Right-click, "Extract
    and save...", and save the file in this directory as `icon.ico`.
-
-Thank you to [hl2guide](https://github.com/hl2guide) for [this
-procedure](https://github.com/t-mart/monoff/issues/3).
